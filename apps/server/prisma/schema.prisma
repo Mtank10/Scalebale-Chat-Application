@@ -13,6 +13,8 @@ datasource db {
 model Message {
   id String @id @default(uuid())
   text String
+  username String?
+  messageId String? @map("message_id")
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("messages")

@@ -1,20 +1,33 @@
 import http from 'http';
 import SocketService from './services/socket';
-async function init(){
+
+async function init() {
+    console.log('Starting Chat Application Server...');
     
     const socketService = new SocketService();
-
-
-    const httpSerer = http.createServer();
+    const httpServer = http.createServer();
     const PORT = process.env.PORT ? process.env.PORT : 8000;
 
-    socketService.io.attach(httpSerer);
+    socketService.io.attach(httpServer);
 
-    httpSerer.listen(PORT,()=>{
-        console.log(`HTTP server at PORT: ${PORT}`);
-    })
+    httpServer.listen(PORT, () => {
+        console.log(`🚀 HTTP server running at PORT: ${PORT}`);
+        console.log(`🔌 Socket.IO server ready for connections`);
+    });
 
     socketService.initListeners();
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+        console.log('SIGTERM received, shutting down gracefully');
+        httpServer.close(() => {
+            console.log('Server closed');
+            process.exit(0);
+        });
+    });
 }
 
-init();
+init().catch((error) => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+});
